@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
+import debounce from "lodash.debounce";
 
 export default function RecipeSearch() {
-  const [recipeData, setRecipeData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [recipeData, setRecipeData] = useState([]);
 
-  useEffect(() => {
-   const delay = 1000; // Delay in milliseconds
-    let timeoutId;
 
-    const fetchData = () => {
-        const baseUrl = `https://api.edamam.com/api/recipes/v2?type=public&app_id=daabd34a&app_key=c949044cdd2a395d1770fbf917ed8524&q=${searchTerm}`;
-        fetch(baseUrl)
+  const debouncedSearch = debounce(() => {
+    console.log("searchterm2:" + searchTerm)
+    const baseUrl = `https://api.edamam.com/api/recipes/v2?type=public&app_id=daabd34a&app_key=c949044cdd2a395d1770fbf917ed8524&q=${searchTerm}`;
+    fetch(baseUrl)
           .then(
-            (response) => response.json()
+            (response) => response.json() 
             //handle the response from the server.
           )
           .then((data) => {
@@ -23,28 +22,19 @@ export default function RecipeSearch() {
           .catch((err) => {
             console.log("Error:", err);
           });
+  }, 500)
 
-          const debouncedFetchData = () => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(fetchData, delay);
-        };
-    
-        // Call the debouncedFetchData function when searchTerm changes
-        debouncedFetchData();
-    
-        // Clean up the timeout when the component unmounts or searchTerm changes
-        return () => clearTimeout(timeoutId);
-      };
-  }, [searchTerm]);
+const handleInputChange = (event) => {
+  setSearchTerm(event.target.value);
+  debouncedSearch();
+  console.log("searchTerm1" + searchTerm);
+}
 
-  function handleSearch(e) {
-    setSearchTerm(e.target.value);
-  }
 
   return (
     <div>
       <h1>Recipe Search</h1>
-      <input type="search" value={searchTerm} onChange={handleSearch} />
+      <input type="search" value={searchTerm} onChange={handleInputChange} />
       <ul>
         {/* {
             recipeData.length !== 0 ? (
